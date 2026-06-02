@@ -71,7 +71,10 @@ public class main {
 				System.out.println(response.body());
 				String json = response.body();
 				Series[] series1 = mapper.readValue(json, Series[].class);
-				System.out.println(series1[0].resumo());
+				System.out.println(series1.length);
+				for (int i = 0; i < series1.length; i++) {
+					System.out.println(series1[i].resumo());
+				}
 			}
 		} catch (URISyntaxException | IOException | InterruptedException e) {
 			// TODO Auto-generated catch block

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Show {
@@ -16,6 +17,7 @@ public class Show {
 	String status;
 	LocalDate premiered;
 	LocalDate ended;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	ArrayList<Network> network = new ArrayList<>();
 
 	public Show() {
