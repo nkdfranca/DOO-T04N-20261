@@ -3,6 +3,7 @@ package MySeries;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,16 +11,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Show {
 	//ArrayList<Show> show = new ArrayList<>();
-	int id;
-	String name;
-	String language;
-	ArrayList<String> genres = new ArrayList<>();
-	ArrayList<Rating> rating = new ArrayList<>();
-	String status;
-	LocalDate premiered;
-	LocalDate ended;
+	public int id;
+	public String name;
+	public String language;
+	public ArrayList<String> genres = new ArrayList<>();
+	public ArrayList<Rating> rating = new ArrayList<>();
+	public String status;
+	public LocalDate premiered;
+	public LocalDate ended;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	ArrayList<Network> network = new ArrayList<>();
+	public ArrayList<Network> network = new ArrayList<>();
 
 	public Show() {
 		

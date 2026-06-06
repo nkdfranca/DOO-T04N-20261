@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Network {
 	@JsonProperty("name")
-	String emissora;
+	public String emissora;
 	
 	public Network() {
 		

@@ -1,6 +1,12 @@
 package MySeries;
 
 import java.io.IOException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -12,11 +18,20 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -41,9 +56,17 @@ import java.util.List;
 
 public class main {
 
+	static Arquivo jsonArquivo = new Arquivo();
+	static File arquivo = new File("Series.json");
+	static String caminho = System.getenv("arquivoJson");
+	static Path caminhoArquivo = Paths.get(caminho + arquivo);
 	static Scanner scan = new Scanner(System.in);
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws JsonProcessingException {
+		ConsultarArquivo();
+		PegarNome();
+		Consulta();
+		ConsultaUnica();
 		ConsultaUnica();
 	}
 
@@ -53,6 +76,7 @@ public class main {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			mapper.registerModule(new JavaTimeModule());
+			mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		
 			HttpClient client = HttpClient.newHttpClient();
 		
@@ -79,11 +103,13 @@ public class main {
 			e.printStackTrace();
 		}
 	}
+	
 	private static void ConsultaUnica() {
 		try {
 			String serie = scan.nextLine();
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
 			mapper.registerModule(new JavaTimeModule());
 			
 			HttpClient client = HttpClient.newHttpClient();
@@ -102,6 +128,9 @@ public class main {
 				String json = response.body();
 				Show series1 = mapper.readValue(json, Show.class);
 				System.out.println(series1.sla());
+				jsonArquivo.setSeries(series1);
+				String jsonArchive = mapper.writeValueAsString(jsonArquivo);
+				Files.writeString(caminhoArquivo, jsonArchive);
 			}
 		} catch (URISyntaxException | IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -109,4 +138,38 @@ public class main {
 		}
 	}
 
+	public static void PegarNome() throws JsonProcessingException {
+		jsonArquivo.setUsuario(scan.nextLine());
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = mapper.writeValueAsString(jsonArquivo);
+		try {
+			Files.writeString(caminhoArquivo, json);
+		}catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public static void ConsultarArquivo() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		try {
+			FileReader reader = new FileReader(caminho + arquivo);
+			Arquivo jsonArquivo = mapper.readValue(reader, Arquivo.class);
+			System.out.println(jsonArquivo.resumo());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StreamReadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DatabindException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }
