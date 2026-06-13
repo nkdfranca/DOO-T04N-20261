@@ -130,8 +130,12 @@ public class Show {
 		}
 	}
 	
+	public String Generos() {
+		return String.join(", ", getGenres());
+	}
+	
 	public String sla() {
 		return "ID: " + getId() + "Nome: " + getName() + ", Idioma: " + getLanguage() + ", Genero: " + getGenres() + ", Avaliação: " + getRating().getAverage() 
-				+ ", Status: " + getStatus() + ", Data de Estreia: " + getPremiered() + ", Data de Encerramento:" + getEnded() + ", Emissora: " + Emissora();
+				+ ", Status: " + getStatus() + ", Data de Estreia: " + getPremiered() + ", Data de Encerramento: " + getEnded() + ", Emissora: " + Emissora();
 	}
 }

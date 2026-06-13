@@ -74,8 +74,9 @@ public class main {
 		TelaPrincipal();
 	}
 
-	public static void TelaPrincipal() {
+	private static void TelaPrincipal() {
 		SwingUtilities.invokeLater(() -> {
+			//janela principal do sistema
 			JFrame principal = new JFrame("MySeries");
 			principal.setSize(1500, 750);
 			principal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -103,16 +104,20 @@ public class main {
 			
 			//painel referente aos resultados da pesquisa das series
 			JPanel resultado = new JPanel();
+			resultado.setLayout(new BorderLayout());
 			String[] colunas = {"ID", "Nome", "Idioma", "Generos", "Nota Geral", "Status Atual", "Data de Estreia", "Data de Termino", "Emissora"};
 			DefaultTableModel modelo = new DefaultTableModel(colunas, 0);
 			JTable tabela = new JTable(modelo);
 			JScrollPane resultados = new JScrollPane(tabela);
-			resultado.add(resultados);
+			resultado.add(resultados, BorderLayout.CENTER);
 			
 			//painel referente as listas de series salvas pelo usuario
 			JPanel listas = new JPanel();
-			JScrollPane listadeseries = new JScrollPane(tabela);
-			listas.add(listadeseries);
+			String[] colunas1 = {"ID", "Nome", "Idioma", "Generos", "Nota Geral", "Status Atual", "Data de Estreia", "Data de Termino", "Emissora"};
+			DefaultTableModel modelo1 = new DefaultTableModel(colunas1, 0);
+			JTable tabela1 = new JTable(modelo1);
+			JScrollPane listadeseries = new JScrollPane(tabela1);
+			listas.add(listadeseries, BorderLayout.CENTER);
 			
 			//controlador de paineis dentro do programa
 			CardLayout cardControl = new CardLayout();
@@ -161,12 +166,28 @@ public class main {
 			search.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					modelo.setRowCount(0);
 					ConsultaSeries(campo.getText());
-					for(int i = 0; i < series.length; i++) {
-						modelo.addRow(new Object[] {series[i].show.get(0).getId(), series[i].show.get(0).getName(), series[i].show.get(0).getLanguage(), series[i].show.get(0).getGenres(), series[i].show.get(0).getRating().getAverage(),
-								series[i].show.get(0).getStatus(), series[i].show.get(0).getPremiered(), series[i].show.get(0).getEnded(), series[i].show.get(0).Emissora()});
+					if (series != null) {
+						for(int i = 0; i < series.length; i++) {
+							modelo.addRow(new Object[] {
+									series[i].show.get(0).getId(), 
+									series[i].show.get(0).getName(), 
+									series[i].show.get(0).getLanguage(), 
+									series[i].show.get(0).Generos(), 
+									series[i].show.get(0).getRating().getAverage(),
+									series[i].show.get(0).getStatus(), 
+									series[i].show.get(0).getPremiered(), 
+									series[i].show.get(0).getEnded(), 
+									series[i].show.get(0).Emissora()
+							});
+						}
 					}
+					
 					cardControl.show(telas, "Resultado");
+					
+					telas.revalidate();
+			        telas.repaint();
 				}
 			});
 		});
@@ -175,14 +196,13 @@ public class main {
 	private static void ConsultaSeries(String serie) {
 		try {
 			series = null;
-			//String serie = scan.nextLine();
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			mapper.registerModule(new JavaTimeModule());
 			mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		
 			HttpClient client = HttpClient.newHttpClient();
-		
+			
 			String params = URLEncoder.encode(serie);
 			URI url = new URI("https://api.tvmaze.com/search/shows?q=" + params);
 		
@@ -195,7 +215,11 @@ public class main {
 			if(response.statusCode() == 200) {
 				System.out.println(response.body());
 				String json = response.body();
+				//por estarmos recebendo uma array de shows precisamos que a desserialização ocorra dentro de uma array tambem
 				series = mapper.readValue(json, Series[].class);
+				for(int i = 0; i < series.length; i++) {
+					System.out.println(series[i].resumo());
+				}
 			}
 		} catch (URISyntaxException | IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -203,9 +227,8 @@ public class main {
 		}
 	}
 	
-	private static void SalvarSerie() {
+	private static void SalvarSerie(int serie) {
 		try {
-			String serie = scan.nextLine();
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 			mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -214,8 +237,7 @@ public class main {
 			
 			HttpClient client = HttpClient.newHttpClient();
 			
-			String params = URLEncoder.encode(serie);
-			URI url = new URI("https://api.tvmaze.com/shows/" + params);
+			URI url = new URI("https://api.tvmaze.com/shows/" + serie);
 			
 			HttpRequest request = HttpRequest.newBuilder(url)
 					.GET()
@@ -224,11 +246,11 @@ public class main {
 			HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 			
 			if(response.statusCode() == 200) {
-				//System.out.println(response.body());
 				String json = response.body();
-				Show series1 = mapper.readValue(json, Show.class);
-				System.out.println(series1.sla());
-				jsonArquivo.setSeries1(series1);
+				//como estamos recebendo apenas o show em si podemos desserializa-lo diretamente no objeto Show
+				Show serie1 = mapper.readValue(json, Show.class);
+				System.out.println(serie1.sla());
+				jsonArquivo.setSeries1(serie1);
 				String jsonArchive = mapper.writeValueAsString(jsonArquivo);
 				Files.writeString(caminhoArquivo, jsonArchive);
 			}
@@ -238,7 +260,7 @@ public class main {
 		}
 	}
 
-	public static void TelaIniciar() {
+	private static void TelaIniciar() {
 		JFrame iniciando = new JFrame("Iniciando MySeries...");
 		iniciando.setSize(new Dimension(500, 250));
 		
@@ -267,7 +289,7 @@ public class main {
 		iniciando.setVisible(true);
 	}
 	
-	public static void ConsultarArquivo() {
+	private static void ConsultarArquivo() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		try {

@@ -33,7 +33,7 @@ public class Series {
 	public String resumo() {
 		return "Nome: " + show.get(0).getName() + ", Idioma: " + show.get(0).getLanguage() + ", Genero: " + show.get(0).getGenres() + 
 				", Avaliação: " + show.get(0).getRating().getAverage() + ", Status: " + show.get(0).getStatus() + ", Data de Estreia: " + show.get(0).getPremiered() 
-				+ ", Data de Encerramento:" + show.get(0).getEnded() + ", Emissora: " + Emissora();
+				+ ", Data de Encerramento: " + show.get(0).getEnded() + ", Emissora: " + Emissora();
 		
 	}
 }
