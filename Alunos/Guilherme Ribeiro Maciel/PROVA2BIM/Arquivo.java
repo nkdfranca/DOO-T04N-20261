@@ -1,10 +1,11 @@
 package MySeries;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Arquivo{
 	private String usuario;
-	private ArrayList<Show> series = new ArrayList<>();
+	private List<Show> series = new ArrayList<>();
 	
 	public Arquivo() {
 		
@@ -18,7 +19,7 @@ public class Arquivo{
 		this.usuario = usuario;
 	}
 	
-	public ArrayList<Show> getSeries() {
+	public List<Show> getSeries() {
 		return series;
 	}
 	

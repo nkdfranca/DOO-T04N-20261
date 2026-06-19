@@ -38,11 +38,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -80,6 +84,17 @@ public class main {
 			JFrame principal = new JFrame("MySeries");
 			principal.setSize(1500, 750);
 			principal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			//menu de interação do botão direito do mouse
+			JPopupMenu popupMenu = new JPopupMenu();
+			JMenuItem fav = new JMenuItem("Salvar como Favorita");
+			JMenuItem assistidas = new JMenuItem("Salvar como Serie ja Assistida");
+			JMenuItem witchlist = new JMenuItem("Salvar como Pretendo Assistir");
+			JMenuItem del = new JMenuItem("Excluir Serie da lista");
+			popupMenu.add(fav);
+			popupMenu.add(assistidas);
+			popupMenu.add(witchlist);
+			popupMenu.add(del);
 			
 			//painel do menu superior
 			JPanel menu = new JPanel();
@@ -122,6 +137,7 @@ public class main {
 			DefaultTableModel modelo1 = new DefaultTableModel(colunas1, 0);
 			JTable tabela1 = new JTable(modelo1);
 			JScrollPane listadeseries = new JScrollPane(tabela1);
+			listadeseries.setPreferredSize(new Dimension(1450, 500));
 			listas.add(listadeseries, BorderLayout.CENTER);
 			
 			//controlador de paineis dentro do programa
@@ -139,6 +155,58 @@ public class main {
 			cardControl.show(telas, "Inicial");
 			principal.setVisible(true);
 			
+			tabela.addMouseListener(new MouseAdapter() {
+				public void mouseReleased(MouseEvent e) {
+					if(e.isPopupTrigger() && e.getComponent() instanceof JTable) {
+						JTable source = (JTable) e.getComponent();
+						int row = source.rowAtPoint(e.getPoint());
+						int column = source.columnAtPoint(e.getPoint());
+						
+						if (!source.isRowSelected(row)) {
+                            source.changeSelection(row, column, false, false);
+                        }
+                        
+                        popupMenu.show(e.getComponent(), e.getX(), e.getY());
+					}
+				}
+			});
+			
+			fav.addActionListener(e -> {
+				int linhaSelecionada = tabela.getSelectedRow();
+				
+				if (linhaSelecionada != -1) {
+					int serieDados = tabela.convertRowIndexToModel(linhaSelecionada);
+					
+					int id = (int) modelo.getValueAt(serieDados, 0);
+					
+					SalvarSerie(id, 1);
+				}
+			});
+			
+			assistidas.addActionListener(e -> {
+				int linhaSelecionada = tabela.getSelectedRow();
+				
+				if (linhaSelecionada != -1) {
+					int serieDados = tabela.convertRowIndexToModel(linhaSelecionada);
+					
+					int id = (int) modelo.getValueAt(serieDados, 0);
+					
+					SalvarSerie(id, 2);
+				}
+			});
+			
+			witchlist.addActionListener(e -> {
+				int linhaSelecionada = tabela.getSelectedRow();
+				
+				if (linhaSelecionada != -1) {
+					int serieDados = tabela.convertRowIndexToModel(linhaSelecionada);
+					
+					int id = (int) modelo.getValueAt(serieDados, 0);
+					
+					SalvarSerie(id, 3);
+				}
+			});
+			
 			pesquisar.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -149,14 +217,53 @@ public class main {
 			favoritos.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					modelo1.setRowCount(0);
+					
+					for(int i = 0; i < jsonArquivo.getSeries().size(); i++) {
+						if (jsonArquivo.getSeries().get(i).getLista() == 1) {
+							modelo1.addRow(new Object[] {
+									jsonArquivo.getSeries().get(i).getId(),
+									jsonArquivo.getSeries().get(i).getName(),
+									jsonArquivo.getSeries().get(i).getLanguage(),
+									jsonArquivo.getSeries().get(i).Generos(),
+									jsonArquivo.getSeries().get(i).getRating().getAverage(),
+									jsonArquivo.getSeries().get(i).getStatus(),
+									jsonArquivo.getSeries().get(i).getPremiered(),
+									jsonArquivo.getSeries().get(i).getEnded(),
+									jsonArquivo.getSeries().get(i).Emissora(),
+							});
+						}
+					}
+					
 					cardControl.show(telas, "Listas");
 					//puxar a lista de series salvas como 1-favoritas
+					
+					telas.revalidate();
+			        telas.repaint();
 				}
 			});
 			
 			assistidos.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					modelo1.setRowCount(0);
+					
+					for(int i = 0; i < jsonArquivo.getSeries().size(); i++) {
+						if (jsonArquivo.getSeries().get(i).getLista() == 2) {
+							modelo1.addRow(new Object[] {
+									jsonArquivo.getSeries().get(i).getId(),
+									jsonArquivo.getSeries().get(i).getName(),
+									jsonArquivo.getSeries().get(i).getLanguage(),
+									jsonArquivo.getSeries().get(i).Generos(),
+									jsonArquivo.getSeries().get(i).getRating().getAverage(),
+									jsonArquivo.getSeries().get(i).getStatus(),
+									jsonArquivo.getSeries().get(i).getPremiered(),
+									jsonArquivo.getSeries().get(i).getEnded(),
+									jsonArquivo.getSeries().get(i).Emissora(),
+							});
+						}
+					}
+					
 					cardControl.show(telas, "Listas");
 					//puxar a lista de series salvas como 2-series assistidas
 				}
@@ -165,6 +272,23 @@ public class main {
 			watchlist.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					modelo1.setRowCount(0);
+					
+					for(int i = 0; i < jsonArquivo.getSeries().size(); i++) {
+						if (jsonArquivo.getSeries().get(i).getLista() == 3) {
+							modelo1.addRow(new Object[] {
+									jsonArquivo.getSeries().get(i).getId(),
+									jsonArquivo.getSeries().get(i).getName(),
+									jsonArquivo.getSeries().get(i).getLanguage(),
+									jsonArquivo.getSeries().get(i).Generos(),
+									jsonArquivo.getSeries().get(i).getRating().getAverage(),
+									jsonArquivo.getSeries().get(i).getStatus(),
+									jsonArquivo.getSeries().get(i).getPremiered(),
+									jsonArquivo.getSeries().get(i).getEnded(),
+									jsonArquivo.getSeries().get(i).Emissora(),
+							});
+						}
+					}
 					cardControl.show(telas, "Listas");
 					//puxar a lista de series salvas como 3-pretendo assistir
 				}
@@ -234,7 +358,7 @@ public class main {
 		}
 	}
 	
-	private static void SalvarSerie(int serie) {
+	private static void SalvarSerie(int serie, int lista) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -256,6 +380,7 @@ public class main {
 				String json = response.body();
 				//como estamos recebendo apenas o show em si podemos desserializa-lo diretamente no objeto Show
 				Show serie1 = mapper.readValue(json, Show.class);
+				serie1.setLista(lista);
 				System.out.println(serie1.sla());
 				jsonArquivo.setSeries1(serie1);
 				String jsonArchive = mapper.writeValueAsString(jsonArquivo);
