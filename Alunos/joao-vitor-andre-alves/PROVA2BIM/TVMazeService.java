@@ -1,15 +1,17 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TVMazeService {
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public String buscarTexto(String nome) throws Exception {
         // esse trecho vai mudar o input do usuario de 'breaking bad' para
@@ -34,50 +36,47 @@ public class TVMazeService {
         String json = buscarTexto(nome);
         List<Serie> series = new ArrayList<>();
 
-        List<Object> resultados = (List<Object>) JsonUtil.parse(json);
-        for (Object item : resultados) {
-            Map<String, Object> obj = (Map<String, Object>) item;
-            Map<String, Object> show = (Map<String, Object>) obj.get("show");
+        JsonNode raiz = mapper.readTree(json);
+        for (JsonNode item : raiz) {
+            JsonNode show = item.get("show");
             series.add(montarSerie(show));
         }
         return series;
     }
 
-    // Pega um "show" (Map) e monta um objeto Serie
-    private Serie montarSerie(Map<String, Object> show) {
-        int id = ((Double) show.get("id")).intValue();
-        String nome = (String) show.get("name");
-        String idioma = (String) show.get("language");
-        String status = (String) show.get("status");
-        String dataEstreia = (String) show.get("premiered");
-        String dataTermino = (String) show.get("ended");
+    private Serie montarSerie(JsonNode show) {
+        int id = show.path("id").asInt();
+        String nome = textoOuNull(show.path("name"));
+        String idioma = textoOuNull(show.path("language"));
+        String status = textoOuNull(show.path("status"));
+        String dataEstreia = textoOuNull(show.path("premiered"));
+        String dataTermino = textoOuNull(show.path("ended"));
 
-        // generos vem como lista; converte pra lista de String
         List<String> generos = new ArrayList<>();
-        List<Object> generosBrutos = (List<Object>) show.get("genres");
-        for (Object g : generosBrutos) {
-            generos.add((String) g);
+        for (JsonNode g : show.path("genres")) {
+            generos.add(g.asText());
         }
 
-        // nota fica dentro de "rating" -> "average" (pode ser null)
-        double nota = 0.0;
-        Map<String, Object> rating = (Map<String, Object>) show.get("rating");
-        if (rating.get("average") != null) {
-            nota = (Double) rating.get("average");
-        }
+        double nota = show.path("rating").path("average").asDouble(0.0);
 
-        // emissora fica em "network" -> "name"; se for null, tenta "webChannel" (ex: Netflix)
         String emissora = "Desconhecida";
-        Map<String, Object> network = (Map<String, Object>) show.get("network");
-        if (network != null) {
-            emissora = (String) network.get("name");
+        JsonNode network = show.path("network");
+        if (!network.isMissingNode() && !network.isNull()) {
+            emissora = network.path("name").asText();
         } else {
-            Map<String, Object> webChannel = (Map<String, Object>) show.get("webChannel");
-            if (webChannel != null) {
-                emissora = (String) webChannel.get("name");
+            JsonNode webChannel = show.path("webChannel");
+            if (!webChannel.isMissingNode() && !webChannel.isNull()) {
+                emissora = webChannel.path("name").asText();
             }
         }
 
         return new Serie(id, nome, idioma, generos, nota, status, dataEstreia, dataTermino, emissora);
+    }
+
+    private String textoOuNull(JsonNode no) {
+        if (no.isMissingNode() || no.isNull()) {
+            return null;
+        }
+        return no.asText();
     }
 }
