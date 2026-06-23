@@ -29,6 +29,7 @@ public class TelaPrincipal extends JFrame {
         add(criarPainelBusca(), BorderLayout.NORTH);
         add(criarPainelCentral(), BorderLayout.CENTER);
         add(criarPainelAcoes(), BorderLayout.SOUTH);
+        estilizar();
     }
 
     private JPanel criarPainelBusca() {
@@ -194,5 +195,23 @@ public class TelaPrincipal extends JFrame {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao salvar: " + ex.getMessage());
         }
+    }
+
+    // melhorias no ux do sistema
+    private void estilizar() {
+        java.awt.Color fundo = new java.awt.Color(30, 30, 40);
+        java.awt.Color texto = new java.awt.Color(230, 230, 235);
+        java.awt.Font fonte = new java.awt.Font("Cascadia Mono", java.awt.Font.PLAIN, 14);
+
+        areaDetalhes.setBackground(fundo);
+        areaDetalhes.setForeground(texto);
+        areaDetalhes.setFont(fonte);
+
+        listaSeries.setFont(fonte);
+        listaSeries.setBackground(fundo);
+        listaSeries.setForeground(texto);
+        listaSeries.setSelectionBackground(new java.awt.Color(70, 90, 140));
+
+        campoBusca.setFont(fonte);
     }
 }

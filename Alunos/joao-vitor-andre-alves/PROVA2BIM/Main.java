@@ -1,4 +1,6 @@
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
 import java.util.List;
 
 public class Main {
@@ -8,6 +10,12 @@ public class Main {
     }
 
     private static void iniciar() {
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception ex) {
+            // se nao achar o 'nimbus' vai usar o visual padrao
+        }
+
         Persistencia persistencia = new Persistencia();
         Usuario usuario = carregarOuCriar(persistencia);
         new TelaPrincipal(usuario).setVisible(true);
