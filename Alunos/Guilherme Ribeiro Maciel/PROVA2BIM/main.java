@@ -51,8 +51,7 @@ public class main {
 	static Scanner scan = new Scanner(System.in);
 	
 	public static void main(String[] args) {
-		jsonArquivo = ConsultarArquivo();
-		System.out.println(jsonArquivo.resumo());
+		ConsultarArquivo();
 		if(jsonArquivo.getUsuario()==null || jsonArquivo.getUsuario().isEmpty()) {
 			TelaIniciar();
 		} else {
@@ -425,6 +424,7 @@ public class main {
 			public void actionPerformed(ActionEvent e1) {
 				
 				if(!nome.getText().isEmpty()) {
+					jsonArquivo = new Arquivo();
 					jsonArquivo.setUsuario(nome.getText());
 					salvarArquivo();
 					iniciando.dispose();
@@ -436,18 +436,15 @@ public class main {
 		});
 	}
 	
-	private static Arquivo ConsultarArquivo() {
+	private static void ConsultarArquivo() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		try (FileReader reader = new FileReader(caminho + arquivo)) {
 			jsonArquivo = mapper.readValue(reader, Arquivo.class);
-			return jsonArquivo;
 		} catch (FileNotFoundException e) {
 			ErrorMessage("Arquivo Json não encontrado, iniciando um novo...");
-			return null;
 		} catch (IOException e) {
 			ErrorMessage(e.getMessage());
-			return null;
 		}
 		
 	}
