@@ -118,4 +118,56 @@ public class JsonUtil {
         JsonUtil j = new JsonUtil(json);
         return j.parseValor();
     }
+
+    // trecho que vai ler objetos e os transformar em texto (caminho contrario das funcoes anteriores)
+    public static String escrever(Object valor) {
+        StringBuilder sb = new StringBuilder();
+        escreverValor(valor, sb);
+        return sb.toString();
+    }
+
+    private static void escreverValor(Object valor, StringBuilder sb) {
+        if (valor == null) {
+            sb.append("null");
+        } else if (valor instanceof String) {
+            sb.append('"').append(escapar((String) valor)).append('"');
+        } else if (valor instanceof Map) {
+            escreverObjeto((Map<String, Object>) valor, sb);
+        } else if (valor instanceof List) {
+            escreverArray((List<Object>) valor, sb);
+        } else {
+            sb.append(valor.toString());
+        }
+    }
+
+    private static void escreverObjeto(Map<String, Object> mapa, StringBuilder sb) {
+        sb.append('{');
+        boolean primeiro = true;
+        for (Map.Entry<String, Object> entrada : mapa.entrySet()) {
+            if (!primeiro) {
+                sb.append(',');
+            }
+            sb.append('"').append(escapar(entrada.getKey())).append('"').append(':');
+            escreverValor(entrada.getValue(), sb);
+            primeiro = false;
+        }
+        sb.append('}');
+    }
+
+    private static void escreverArray(List<Object> lista, StringBuilder sb) {
+        sb.append('[');
+        boolean primeiro = true;
+        for (Object item : lista) {
+            if (!primeiro) {
+                sb.append(',');
+            }
+            escreverValor(item, sb);
+            primeiro = false;
+        }
+        sb.append(']');
+    }
+
+    private static String escapar(String texto) {
+        return texto.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
 }
