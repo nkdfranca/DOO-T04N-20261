@@ -71,7 +71,8 @@ public class main {
 	static Scanner scan = new Scanner(System.in);
 	
 	public static void main(String[] args) {
-		ConsultarArquivo();
+		jsonArquivo = ConsultarArquivo();
+		System.out.println(jsonArquivo.resumo());
 		if(jsonArquivo.getUsuario()==null || jsonArquivo.getUsuario().isEmpty()) {
 			TelaIniciar();
 		} else {
@@ -105,8 +106,8 @@ public class main {
 			JButton watchlist = new JButton("Series que Pretendo Assistir");
 			menu.add(pesquisar);
 			menu.add(favoritos);
-			menu.add(watchlist);
 			menu.add(assistidos);
+			menu.add(watchlist);
 			
 			//painel inicial
 			JPanel inicial = new JPanel();
@@ -201,6 +202,8 @@ public class main {
 			fav.addActionListener(e -> {
 				int linhaSelecionada = tabela.getSelectedRow();
 				
+				System.out.println(linhaSelecionada);
+				
 				if (linhaSelecionada != -1) {
 					int serieDados = tabela.convertRowIndexToModel(linhaSelecionada);
 					
@@ -235,18 +238,27 @@ public class main {
 			});
 			
 			del.addActionListener(e -> {
-				int linhaSelecionada = tabela.getSelectedRow();
+				int linhaSelecionada = tabela1.getSelectedRow();
 				
-				if (linhaSelecionada != -1) {
-					int serieDados = tabela.convertRowIndexToModel(linhaSelecionada);
-					
-					jsonArquivo.getSeries().remove(serieDados);
-					
-					salvarArquivo();
-				}
+				System.out.println(linhaSelecionada);
 				
-				telas.revalidate();
-		        telas.repaint();
+				if (linhaSelecionada >= 0) { 
+				        int serieDados = tabela1.convertRowIndexToModel(linhaSelecionada);
+				        
+				        Object valorId = modelo1.getValueAt(serieDados, 0);
+				        Long id = Long.valueOf(valorId.toString());
+				        
+				        if (jsonArquivo != null && jsonArquivo.getSeries() != null) {
+				            jsonArquivo.getSeries().removeIf(serie -> serie.getId().equals(id));
+				            salvarArquivo(); 
+				        }
+				        
+				        modelo1.removeRow(linhaSelecionada);
+				        
+				        System.out.println("ID removido: " + id);
+				    } else {
+				        System.out.println("Nenhuma linha foi selecionada na tabela.");
+				    }
 			});
 			
 			pesquisar.addActionListener(new ActionListener() {
@@ -279,9 +291,6 @@ public class main {
 					
 					cardControl.show(telas, "Listas");
 					//puxar a lista de series salvas como 1-favoritas
-					
-					telas.revalidate();
-			        telas.repaint();
 				}
 			});
 			
@@ -461,6 +470,7 @@ public class main {
 			// TODO Auto-generated catch block
 			ErrorMessage(e.getMessage());
 		}
+		System.out.println("arquivo salvo");
 	}
 
 	private static void TelaIniciar() {
@@ -495,24 +505,20 @@ public class main {
 		});
 	}
 	
-	private static void ConsultarArquivo() {
+	private static Arquivo ConsultarArquivo() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
-		try {
-			FileReader reader = new FileReader(caminho + arquivo);
+		try (FileReader reader = new FileReader(caminho + arquivo)) {
 			jsonArquivo = mapper.readValue(reader, Arquivo.class);
-			//System.out.println(jsonArquivo.resumo());
+			System.out.println(jsonArquivo.resumo());
+			return jsonArquivo;
 		} catch (FileNotFoundException e) {
 			ErrorMessage("Arquivo Json não encontrado, iniciando um novo...");
-		} catch (StreamReadException e) {
-			// TODO Auto-generated catch block
-			ErrorMessage(e.getMessage());
-		} catch (DatabindException e) {
-			// TODO Auto-generated catch block
-			ErrorMessage(e.getMessage());
+			return null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			ErrorMessage(e.getMessage());
+			return null;
 		}
 		
 	}
