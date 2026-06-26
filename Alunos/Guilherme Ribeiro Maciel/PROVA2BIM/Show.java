@@ -2,25 +2,31 @@ package MySeries;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Show {
 	//ArrayList<Show> show = new ArrayList<>();
-	public int id;
-	public String name;
-	public String language;
-	public ArrayList<String> genres = new ArrayList<>();
-	public Rating rating;
-	public String status;
-	public LocalDate premiered;
-	public LocalDate ended;
+	private Long id;
+	private String name;
+	private String language;
+	private ArrayList<String> genres = new ArrayList<>();
+	private Rating rating;
+	private String status;
+	private LocalDate premiered;
+	private LocalDate ended;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public Network network;
+	private Network network;
+	private int lista;
+
+	public int getLista() {
+		return lista;
+	}
+
+	public void setLista(int lista) {
+		this.lista = lista;
+	}
 
 	public Show() {
 		
@@ -90,11 +96,11 @@ public class Show {
 		this.network = network;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	
@@ -106,8 +112,27 @@ public class Show {
 		}
 	}
 	
+	public String Lista() {
+		switch(lista) {
+			case 0:
+				return "somente consulta";
+			case 1:
+				return "Favoritas";
+			case 2:
+				return "Series ja Assistidas";
+			case 3:
+				return "Series que Pretendo Assistir";
+			default:
+				return null;
+		}
+	}
+	
+	public String Generos() {
+		return String.join(", ", getGenres());
+	}
+	
 	public String sla() {
-		return "Nome: " + getName() + ", Idioma: " + getLanguage() + ", Genero: " + getGenres() + ", Avaliação: " + getRating().getAverage() 
-				+ ", Status: " + getStatus() + ", Data de Estreia: " + getPremiered() + ", Data de Encerramento:" + getEnded() + ", Emissora: " + Emissora();
+		return "ID: " + getId() + "Nome: " + getName() + ", Idioma: " + getLanguage() + ", Genero: " + getGenres() + ", Avaliação: " + getRating().getAverage() 
+				+ ", Status: " + getStatus() + ", Data de Estreia: " + getPremiered() + ", Data de Encerramento: " + getEnded() + ", Emissora: " + Emissora();
 	}
 }

@@ -1,10 +1,11 @@
 package MySeries;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Arquivo extends Show{
+public class Arquivo{
 	private String usuario;
-	private ArrayList<Show> series = new ArrayList<>();
+	private List<Show> series = new ArrayList<>();
 	
 	public Arquivo() {
 		
@@ -18,7 +19,7 @@ public class Arquivo extends Show{
 		this.usuario = usuario;
 	}
 	
-	public ArrayList<Show> getSeries() {
+	public List<Show> getSeries() {
 		return series;
 	}
 	
@@ -26,17 +27,11 @@ public class Arquivo extends Show{
 		this.series.add(series);
 	}
 	
-	public void setSeries(ArrayList<Show> series) {
-		this.series = series;
-	}
-	
-	public void AllSeries() {
-		for(int i = 0; i < series.size(); i++) {
-			System.out.println(getSeries().get(i).getName());
-		}
+	public void setSeries(List<Show> list) {
+		this.series = list  != null ? new ArrayList<>(list) : new ArrayList<>();
 	}
 	
 	public String resumo() {
-		return "Usuario: " + getUsuario() + ", Serie: " + getSeries().get(0).getName();
+		return "Usuario: " + getUsuario() + ", tamanho da lista: " + getSeries().size();
 	}
 }
